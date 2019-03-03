@@ -162,29 +162,13 @@
         
     ],
     "models": {
-        "Resource«Pet»": {
+        "HttpEntity«Resource«Pet»»": {
             "description": "",
-            "id": "Resource«Pet»",
+            "id": "HttpEntity«Resource«Pet»»",
             "properties": {
-                "age": {
+                "body": {
                     "required": false,
-                    "format": "int32",
-                    "type": "integer"
-                },
-                "id": {
-                    "required": false,
-                    "type": "string"
-                },
-                "links": {
-                    "required": false,
-                    "items": {
-                        "type": "Link_1"
-                    },
-                    "type": "array"
-                },
-                "name": {
-                    "required": false,
-                    "type": "string"
+                    "type": "Resource«Pet»"
                 }
             }
         },
