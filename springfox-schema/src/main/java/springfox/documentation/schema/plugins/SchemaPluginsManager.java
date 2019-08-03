@@ -26,6 +26,8 @@ import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.stereotype.Component;
 import springfox.documentation.schema.Model;
 import springfox.documentation.schema.ModelProperty;
+import springfox.documentation.schema.ModelSpecification;
+import springfox.documentation.schema.PropertySpecification;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.ModelBuilderPlugin;
 import springfox.documentation.spi.schema.ModelPropertyBuilderPlugin;
@@ -79,6 +81,13 @@ public class SchemaPluginsManager {
     return context.getBuilder().build();
   }
 
+  public ModelSpecification modelSpecification(ModelContext context) {
+    for (ModelBuilderPlugin enricher : modelEnrichers.getPluginsFor(context.getDocumentationType())) {
+      enricher.apply(context);
+    }
+    return context.getModelSpecificationBuilder().build();
+  }
+
   public ViewProviderPlugin viewProvider(DocumentationType documentationType) {
     return viewProviders.getPluginFor(documentationType);
   }
@@ -90,17 +99,35 @@ public class SchemaPluginsManager {
     return empty();
   }
 
+  public Optional<ModelSpecification> syntheticModelSpecification(ModelContext context) {
+    if (syntheticModelProviders.hasPluginFor(context)) {
+      return of(syntheticModelProviders.getPluginFor(context).createModelSpecification(context));
+    }
+    return empty();
+  }
+
   public List<ModelProperty> syntheticProperties(ModelContext context) {
     if (syntheticModelProviders.hasPluginFor(context)) {
       return syntheticModelProviders.getPluginFor(context).properties(context);
     }
-    return new ArrayList<ModelProperty>();
+    return new ArrayList<>();
   }
 
   public Set<ResolvedType> dependencies(ModelContext context) {
     if (syntheticModelProviders.hasPluginFor(context)) {
       return syntheticModelProviders.getPluginFor(context).dependencies(context);
     }
-    return new HashSet<ResolvedType>();
+    return new HashSet<>();
+  }
+
+  public List<PropertySpecification> syntheticPropertySpecifications(ModelContext context) {
+    if (syntheticModelProviders.hasPluginFor(context)) {
+      return syntheticModelProviders.getPluginFor(context).propertySpecifications(context);
+    }
+    return new ArrayList<>();
+  }
+
+  public PropertySpecification propertySpecification(ModelPropertyContext modelPropertyContext) {
+    return null;
   }
 }

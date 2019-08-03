@@ -21,6 +21,7 @@ package springfox.documentation.spi.schema.contexts;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.TypeResolver;
 import springfox.documentation.builders.ModelBuilder;
+import springfox.documentation.builders.ModelSpecificationBuilder;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.AlternateTypeProvider;
 import springfox.documentation.spi.schema.GenericTypeNamingStrategy;
@@ -46,6 +47,7 @@ public class ModelContext {
   private final ModelContext parentContext;
   private final Set<ResolvedType> seenTypes = new HashSet<>();
   private final ModelBuilder modelBuilder;
+  private final ModelSpecificationBuilder modelSpecificationBuilder;
   private final AlternateTypeProvider alternateTypeProvider;
   private final GenericTypeNamingStrategy genericNamingStrategy;
   private final Set<Class> ignorableTypes;
@@ -75,11 +77,15 @@ public class ModelContext {
     this.returnType = returnType;
     this.view = view;
     this.validationGroups = new HashSet<>(validationGroups);
+    String sourceIdentifier = String.format(
+        "%s_%s",
+        parameterId,
+        type.getBriefDescription());
     this.modelBuilder =
-        new ModelBuilder(String.format(
-            "%s_%s",
-            parameterId,
-            type.getBriefDescription()));
+        new ModelBuilder(sourceIdentifier);
+
+    this.modelSpecificationBuilder =
+        new ModelSpecificationBuilder(sourceIdentifier);
   }
 
   @SuppressWarnings("ParameterNumber")
@@ -98,11 +104,13 @@ public class ModelContext {
     this.ignorableTypes = parentContext.ignorableTypes;
     this.registeredTypes = parentContext.registeredTypes;
     this.genericNamingStrategy = parentContext.getGenericNamingStrategy();
+    String sourceIdentifier = String.format(
+        "%s_%s",
+        parameterId,
+        input.getBriefDescription());
     this.modelBuilder =
-        new ModelBuilder(String.format(
-            "%s_%s",
-            parameterId,
-            input.getBriefDescription()));
+        new ModelBuilder(sourceIdentifier);
+    this.modelSpecificationBuilder = new ModelSpecificationBuilder(sourceIdentifier);
   }
 
   /**
@@ -302,8 +310,16 @@ public class ModelContext {
     return parentContext.getGenericNamingStrategy();
   }
 
+  /**
+   * @since 3.0.0 {@link ModelContext#getModelSpecificationBuilder} instead
+   */
+  @Deprecated
   public ModelBuilder getBuilder() {
     return modelBuilder;
+  }
+
+  public ModelSpecificationBuilder getModelSpecificationBuilder() {
+    return modelSpecificationBuilder;
   }
 
   public void seen(ResolvedType resolvedType) {
@@ -324,14 +340,30 @@ public class ModelContext {
     ModelContext that = (ModelContext) o;
 
     return
-        Objects.equals(parameterId, that.parameterId)
-            && Objects.equals(groupName, that.groupName)
-            && Objects.equals(type, that.type)
-            && Objects.equals(view, that.view)
-            && Objects.equals(validationGroups, that.validationGroups)
-            && Objects.equals(documentationType, that.documentationType)
-            && Objects.equals(returnType, that.returnType)
-            && Objects.equals(namingStrategy(), that.namingStrategy());
+        Objects.equals(
+            parameterId,
+            that.parameterId)
+            && Objects.equals(
+            groupName,
+            that.groupName)
+            && Objects.equals(
+            type,
+            that.type)
+            && Objects.equals(
+            view,
+            that.view)
+            && Objects.equals(
+            validationGroups,
+            that.validationGroups)
+            && Objects.equals(
+            documentationType,
+            that.documentationType)
+            && Objects.equals(
+            returnType,
+            that.returnType)
+            && Objects.equals(
+            namingStrategy(),
+            that.namingStrategy());
   }
 
   private String namingStrategy() {
