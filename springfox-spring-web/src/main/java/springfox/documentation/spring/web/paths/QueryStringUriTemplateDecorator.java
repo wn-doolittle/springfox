@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.*;
 import static java.util.stream.Collectors.*;
@@ -78,20 +79,18 @@ class QueryStringUriTemplateDecorator implements PathDecorator {
     return url.contains("?");
   }
 
-  @SuppressWarnings("unchecked")
   private Set<String> queryParamNames(PathContext context) {
-    return context.getParameters().stream()
+    return new TreeSet<>(context.getParameters().stream()
         .filter(queryStringParams().and(onlyOneAllowableValue().negate()))
         .map(Parameter::getName)
-        .collect(toCollection(() -> new TreeSet(naturalOrder())));
+        .collect(Collectors.toList()));
   }
 
-  @SuppressWarnings("unchecked")
   private String prefilledQueryParams(PathContext context) {
     return String.join("&", context.getParameters().stream()
         .filter(onlyOneAllowableValue())
         .map(queryStringWithValue())
-        .collect(toCollection(() -> new TreeSet(naturalOrder()))))
+        .collect(toSet()))
         .trim();
   }
 

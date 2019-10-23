@@ -18,10 +18,21 @@
  */
 package springfox.documentation.spring.data.rest.schema;
 
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static springfox.documentation.schema.ResolvedTypes.modelRefFactory;
+
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.server.LinkRelationProvider;
+
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.TypeResolver;
-import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.Resources;
+
 import springfox.documentation.builders.ModelPropertyBuilder;
 import springfox.documentation.schema.Model;
 import springfox.documentation.schema.ModelProperty;
@@ -32,24 +43,16 @@ import springfox.documentation.spi.schema.EnumTypeDeterminer;
 import springfox.documentation.spi.schema.SyntheticModelProviderPlugin;
 import springfox.documentation.spi.schema.contexts.ModelContext;
 
-import java.util.List;
-import java.util.Set;
-
-import static java.util.Collections.*;
-import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
-import static springfox.documentation.schema.ResolvedTypes.*;
-
 class EmbeddedCollectionModelProvider implements SyntheticModelProviderPlugin {
 
   private final TypeResolver resolver;
-  private final RelProvider relProvider;
+  private final LinkRelationProvider relProvider;
   private final TypeNameExtractor typeNameExtractor;
   private final EnumTypeDeterminer enumTypeDeterminer;
 
   EmbeddedCollectionModelProvider(
       TypeResolver resolver,
-      RelProvider relProvider,
+      LinkRelationProvider relProvider,
       TypeNameExtractor typeNameExtractor,
       EnumTypeDeterminer enumTypeDeterminer) {
     this.resolver = resolver;
@@ -86,9 +89,9 @@ class EmbeddedCollectionModelProvider implements SyntheticModelProviderPlugin {
     Class<?> type = typeParameters.get(0).getErasedType();
     return singletonList(
         new ModelPropertyBuilder()
-            .name(relProvider.getCollectionResourceRelFor(type))
+            .name(relProvider.getCollectionResourceRelFor(type).value())
             .type(resolver.resolve(List.class, type))
-            .qualifiedType(Resources.class.getName())
+            .qualifiedType(CollectionModel.class.getName())
             .position(0)
             .required(true)
             .isHidden(false)

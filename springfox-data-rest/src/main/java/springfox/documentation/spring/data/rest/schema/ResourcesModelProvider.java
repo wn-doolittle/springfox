@@ -18,10 +18,24 @@
  */
 package springfox.documentation.spring.data.rest.schema;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static springfox.documentation.schema.ResolvedTypes.modelRefFactory;
+
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.TypeResolver;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resources;
+
 import springfox.documentation.builders.ModelPropertyBuilder;
 import springfox.documentation.schema.Model;
 import springfox.documentation.schema.ModelProperty;
@@ -31,16 +45,6 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.EnumTypeDeterminer;
 import springfox.documentation.spi.schema.SyntheticModelProviderPlugin;
 import springfox.documentation.spi.schema.contexts.ModelContext;
-
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
-import static springfox.documentation.schema.ResolvedTypes.*;
 
 class ResourcesModelProvider implements SyntheticModelProviderPlugin {
 
@@ -139,7 +143,7 @@ class ResourcesModelProvider implements SyntheticModelProviderPlugin {
 
   @Override
   public boolean supports(ModelContext delimiter) {
-    return Resources.class.equals(resourceType(delimiter.getType()).getErasedType())
+    return CollectionModel.class.equals(resourceType(delimiter.getType()).getErasedType())
         && delimiter.getDocumentationType() == DocumentationType.SWAGGER_2;
   }
 
